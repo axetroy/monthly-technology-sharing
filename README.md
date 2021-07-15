@@ -9,5 +9,10 @@
 3. [2021.05-1 分享](./articles/2021.05-1.md) typescript 介绍，初步使用
 4. [2021.05-2 分享](./articles/2021.05-2.md) typescript 深入，高级技巧
 5. [2021.06-1 分享](./articles/2021.06-1.md) 前端工具链 Babel/typescript/webpack/prettier/eslint 等介绍
-6. [2021.06-2 分享](./articles/2021.06-2.md) 测试
-7. [2021.07-1 分享](./articles/2021.06-2.md) 编译原理
+6. [2021.06-2 分享](./articles/2021.06-2.md) 前端测试框架
+7. [2021.07-1 分享](./articles/2021.07-1.md) float64 精度运算
+8. [2021.07-2 分享](./articles/2021.06-2.md) 银行家算法
+
+9. css 垂直居中的 N 种方式
+10. 原生方法实现 canvas 画板，支持 PC/移动端 和导出图片
+11. 编译原理
