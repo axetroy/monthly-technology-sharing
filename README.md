@@ -11,10 +11,12 @@
 5. [2021.06-1 分享](./articles/2021.06-1.md) 前端工具链 Babel/typescript/webpack/prettier/eslint 等介绍
 6. [2021.06-2 分享](./articles/2021.06-2.md) 前端测试框架
 7. [2021.07-1 分享](./articles/2021.07-1.md) float64 精度运算
-8. [2021.07-2 分享](./articles/2021.06-2.md) 银行家算法
+8. [2021.07-2 分享](./articles/2021.07-2.md) 四舍五入和银行家算法
 
 9. css 垂直居中的 N 种方式
 10. 原生方法实现 canvas 画板，支持 PC/移动端 和导出图片
 11. 编译原理
 12. SPA，去掉 Hash
 13. SSR
+14. 二进制/十进制/十六进制
+15. javascript 的类型转换
