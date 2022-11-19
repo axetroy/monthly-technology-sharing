@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>图片里面隐藏另一张图片</title>
+    <style>
+      #app {
+        display: flex;
+      }
+
+      #app > div {
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <input accept="image/png,image/jpg,image/jpeg" id="file" type="file" />
+    </div>
+
+    <div id="app">
+      <div>
+        <h3>输入图片</h3>
+        <canvas id="image"></canvas>
+      </div>
+
+      <div>
+        <h3>合成结果</h3>
+        <canvas id="result"></canvas>
+        <div>
+          <button onclick="restoreImage()">还原水印</button>
+        </div>
+        <canvas id="watermark"></canvas>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("canvas");
+
+      let watermarkStr = "";
+
+      getWatermarkBinary().then((str) => {
+        console.log(str.length);
+        watermarkStr = str;
+      });
+
+      // 获取水印图片的二进制
+      async function getWatermarkBinary() {
+        const imageData = await getImageData("2022.09-1_watermark.png");
+
+        console.log(imageData);
+
+        const str = Array.from(imageData.data)
+          .map((v) => {
+            return v.toString(2).padStart(8, 0);
+          })
+          .join("");
+
+        return str;
+      }
+
+      // 渲染合成图片
+      async function render(imageData) {
+        console.log(imageData);
+
+        const pixels = await new Promise((resolve) => {
+          var myWorker = new Worker("2022.09-1_get_image_pixels.js");
+
+          myWorker.onmessage = function (e) {
+            resolve(e.data);
+          };
+
+          myWorker.postMessage(imageData.data);
+        });
+
+        const newPixels = pixels.map((p, index) => {
+          if (index > watermarkStr.length - 1) {
+            // console.log("没有水印信息...", index);
+            return parseInt(p, 2);
+          }
+          return parseInt(p.slice(0, -1) + watermarkStr[index], 2);
+        });
+
+        const newImageData = new ImageData(
+          new Uint8ClampedArray(newPixels),
+          imageData.width,
+          imageData.height
+        );
+
+        var canvas = document.getElementById("result");
+        canvas.width = newImageData.width;
+        canvas.height = newImageData.height;
+        var ctx = canvas.getContext("2d");
+
+        ctx.putImageData(newImageData, 0, 0);
+      }
+
+      // 根据 URL 获取图片数据
+      function getImageData(src) {
+        var img = new Image();
+
+        return new Promise((resolve, reject) => {
+          img.onload = function () {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            ctx.canvas.width = this.width;
+            ctx.canvas.height = this.height;
+            ctx.drawImage(this, 0, 0, this.width, this.height);
+            const imageData = ctx.getImageData(0, 0, this.width, this.height);
+
+            resolve(imageData);
+            canvas.remove();
+          };
+
+          img.onerror = function (err) {
+            reject(err);
+          };
+
+          img.src = src;
+        });
+      }
+
+      function restoreImageByImageData(imageData) {
+        const r = Array.from(imageData.data)
+          .map((p) => {
+            return p.toString(2).padStart(8, 0).slice(-1);
+          })
+          .slice(0, watermarkStr.length);
+
+        const img = [];
+
+        for (let i = 0; i < r.length; i += 8) {
+          const bit1 = r[i];
+          const bit2 = r[i + 1];
+          const bit3 = r[i + 2];
+          const bit4 = r[i + 3];
+          const bit5 = r[i + 4];
+          const bit6 = r[i + 5];
+          const bit7 = r[i + 6];
+          const bit8 = r[i + 7];
+
+          const bytes = bit1 + bit2 + bit3 + bit4 + bit5 + bit6 + bit7 + bit8;
+
+          img.push(parseInt(bytes, 2));
+        }
+
+        const newImageData = new ImageData(new Uint8ClampedArray(img), 145, 59);
+
+        console.log(newImageData);
+
+        var canvas = document.getElementById("watermark");
+        canvas.width = newImageData.width;
+        canvas.height = newImageData.height;
+
+        var ctx = canvas.getContext("2d");
+
+        ctx.putImageData(newImageData, 0, 0);
+      }
+
+      function restoreImage() {
+        var canvas = document.getElementById("result");
+        var ctx = canvas.getContext("2d");
+
+        const imageData = ctx.getImageData(
+          0,
+          0,
+          ctx.canvas.width,
+          ctx.canvas.height
+        );
+
+        restoreImageByImageData(imageData);
+      }
+
+      document.querySelector("#file").addEventListener("change", (e) => {
+        var file = e.target.files[0];
+        var reader = new FileReader();
+
+        // this is to setup loading the image
+        reader.onloadend = function () {
+          const img = new Image();
+
+          img.src = reader.result;
+
+          img.onload = function () {
+            var canvas = document.getElementById("image");
+            canvas.width = this.width;
+            canvas.height = this.height;
+            var ctx = canvas.getContext("2d");
+
+            ctx.drawImage(this, 0, 0, this.width, this.height);
+          };
+
+          getImageData(reader.result).then(render);
+        };
+
+        // this is to read the file
+        reader.readAsDataURL(file);
+      });
+    </script>
+  </body>
+</html>
