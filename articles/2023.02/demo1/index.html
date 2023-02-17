@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div>
+      URL: <span id="url"></span>
+
+      <button id="forward">前进</button>
+      <button id="back">后退</button>
+      <button id="change">改变 Hash</button>
+    </div>
+
+    <script>
+      const $url = document.getElementById("url");
+
+      $url.textContent = location.href;
+
+      document.getElementById("forward").addEventListener("click", () => {
+        history.forward();
+      });
+
+      document.getElementById("back").addEventListener("click", () => {
+        history.back();
+      });
+
+      document.getElementById("change").addEventListener("click", () => {
+        location.hash = parseInt(Math.random() * 100000);
+      });
+
+      // 监听hash变化，点击浏览器的前进后退会触发
+      window.addEventListener(
+        "hashchange",
+        function (event) {
+          let newURL = event.newURL; // hash 改变后的新 url
+          let oldURL = event.oldURL; // hash 改变前的旧 url
+
+          console.info(`${oldURL} --> ${newURL}`);
+
+          $url.textContent = newURL;
+        },
+        false
+      );
+    </script>
+  </body>
+</html>
